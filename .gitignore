@@ -1,7 +1,7 @@
 # Compiled binaries
 *.o
 *.a
-overworld_ruined_portal_chest_loot
+overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot
 
 # Build directories
 build/
