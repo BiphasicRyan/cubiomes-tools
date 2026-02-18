@@ -2,7 +2,6 @@
 *.o
 *.a
 spawn_anchor
-tools/*/spawn_anchor
 
 # Build directories
 build/
