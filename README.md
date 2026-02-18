@@ -16,17 +16,17 @@ A collection of tools built on top of the [cubiomes](https://github.com/xpple/cu
 
 3. **Run the tools:**
    ```bash
-   ./tools/spawn_anchor/spawn_anchor 123456789 256
+   ./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 123456789 256
    ```
 
 ## Tools
 
-### spawn_anchor
+### overworld_ruined_portal_chest_loot
 Finds ruined portals near spawn and analyzes their chest contents.
 
 **Usage:**
 ```bash
-./tools/spawn_anchor/spawn_anchor <seed> <radius_chunks>
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot <seed> <radius_chunks>
 ```
 
 **Parameters:**
@@ -35,7 +35,7 @@ Finds ruined portals near spawn and analyzes their chest contents.
 
 **Example:**
 ```bash
-./tools/spawn_anchor/spawn_anchor 123456789 256
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 123456789 256
 ```
 
 **Sample Output:**
@@ -114,7 +114,7 @@ git push
    mkdir tools/my_tool
    ```
 
-2. Add your source files and a Makefile (see `tools/spawn_anchor/Makefile` for reference)
+2. Add your source files and a Makefile (see `tools/overworld_ruined_portal_chest_loot/Makefile` for reference)
 
 3. Update the root `Makefile` to include your new tool in the `TOOLS` variable
 
@@ -136,10 +136,10 @@ cubiomes-tools/
 │   ├── *.h                 # Header files
 │   └── ...                 # Other cubiomes files
 └── tools/                   # Tool implementations
-    └── spawn_anchor/
-        ├── spawn_anchor.c   # Source code
+    └── overworld_ruined_portal_chest_loot/
+        ├── overworld_ruined_portal_chest_loot.c   # Source code
         ├── Makefile        # Tool-specific build file
-        └── spawn_anchor     # Compiled binary
+        └── overworld_ruined_portal_chest_loot     # Compiled binary
 ```
 
 ### Submodule Issues

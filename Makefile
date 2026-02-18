@@ -7,7 +7,7 @@ TOOLS_DIR := tools
 CUBIOMES_DIR := cubiomes
 
 # Targets
-TOOLS := $(TOOLS_DIR)/spawn_anchor/spawn_anchor
+TOOLS := $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot
 
 .PHONY: all clean cubiomes tools
 
@@ -25,7 +25,7 @@ $(CUBIOMES_DIR)/libcubiomes.a:
 
 tools: $(TOOLS)
 
-$(TOOLS_DIR)/spawn_anchor/spawn_anchor: $(TOOLS_DIR)/spawn_anchor/spawn_anchor.c $(CUBIOMES_DIR)/libcubiomes.a
+$(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot: $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot.c $(CUBIOMES_DIR)/libcubiomes.a
 	$(CC) $(CFLAGS) -I$(CUBIOMES_DIR) -o $@ $< $(CUBIOMES_DIR)/libcubiomes.a $(LDFLAGS)
 
 clean:

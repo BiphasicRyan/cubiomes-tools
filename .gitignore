@@ -1,7 +1,7 @@
 # Compiled binaries
 *.o
 *.a
-spawn_anchor
+overworld_ruined_portal_chest_loot
 
 # Build directories
 build/
