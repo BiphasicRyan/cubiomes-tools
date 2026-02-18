@@ -25,8 +25,8 @@ $(CUBIOMES_DIR)/libcubiomes.a:
 
 tools: $(TOOLS)
 
-$(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot: $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot.c $(CUBIOMES_DIR)/libcubiomes.a
-	$(CC) $(CFLAGS) -I$(CUBIOMES_DIR) -o $@ $< $(CUBIOMES_DIR)/libcubiomes.a $(LDFLAGS)
+$(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot: $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot.c $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/parsing.c $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/loot_printer.c $(CUBIOMES_DIR)/libcubiomes.a
+	$(CC) $(CFLAGS) -I$(CUBIOMES_DIR) -o $@ $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot.c $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/parsing.c $(TOOLS_DIR)/overworld_ruined_portal_chest_loot/loot_printer.c $(CUBIOMES_DIR)/libcubiomes.a $(LDFLAGS)
 
 clean:
 	rm -f $(TOOLS)

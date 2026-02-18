@@ -1,10 +1,8 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef PARSING_H
+#define PARSING_H
 
 #include <stdint.h>
-#include <stdlib.h>
-
-static inline int64_t sqr64(int64_t a) { return a * a; }
+#include <inttypes.h>
 
 uint64_t parse_u64(const char *s);
 int parse_i32_nonneg(const char *s, const char *what);

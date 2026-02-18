@@ -1,5 +1,5 @@
-#ifndef LOOT_DISPLAY_H
-#define LOOT_DISPLAY_H
+#ifndef LOOT_PRINTER_H
+#define LOOT_PRINTER_H
 
 #include <stdint.h>
 

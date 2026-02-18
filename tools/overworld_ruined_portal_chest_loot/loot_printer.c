@@ -1,9 +1,7 @@
-#include "loot_display.h"
-
+#include "loot_printer.h"
 #include "loot/loot_tables.h"
 #include "loot/loot_table_context.h"
 #include "loot/items.h"
-
 #include <stdio.h>
 #include <string.h>
 

@@ -7,73 +7,16 @@
 #include "loot/loot_table_context.h"
 #include "loot/items.h"
 
+#include "parsing.h"
+#include "loot_printer.h"
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <string.h>
 
 static inline int64_t sqr64(int64_t a) { return a * a; }
 
-static uint64_t parse_u64(const char *s)
-{
-    errno = 0;
-    char *end = NULL;
-    unsigned long long v = strtoull(s, &end, 0); // supports decimal and 0x...
-    if (errno != 0 || end == s || *end != '\0') {
-        fprintf(stderr, "Invalid seed: '%s'\n", s);
-        exit(2);
-    }
-    return (uint64_t)v;
-}
-
-static int parse_i32_nonneg(const char *s, const char *what)
-{
-    errno = 0;
-    char *end = NULL;
-    long v = strtol(s, &end, 10);
-    if (errno != 0 || end == s || *end != '\0' || v < 0 || v > 2000000) {
-        fprintf(stderr, "Invalid %s: '%s'\n", what, s);
-        exit(2);
-    }
-    return (int)v;
-}
-
-static void print_loot(const char *lootTable, int mc, uint64_t lootSeed)
-{
-    LootTableContext *ctx = NULL;
-    if (!init_loot_table_name(&ctx, lootTable, mc) || ctx == NULL) {
-        printf("      (loot table unsupported: %s)\n", lootTable);
-        return;
-    }
-
-    set_loot_seed(ctx, lootSeed);
-    generate_loot(ctx);
-
-    if (ctx->generated_item_count <= 0) {
-        printf("      (no items)\n");
-        return;
-    }
-
-    for (int i = 0; i < ctx->generated_item_count; i++) {
-        ItemStack it = ctx->generated_items[i];
-        
-        // Convert local item ID to global item ID first
-        int globalItemId = get_global_item_id(ctx, it.item);
-        const char *itemName = global_id2item_name(globalItemId, mc);
-        
-        if (itemName) {
-            const char *displayName = itemName;
-            if (strncmp(itemName, "minecraft:", 10) == 0) {
-                displayName = itemName + 10;
-            }
-            printf("      %s x%d\n", displayName, it.count);
-        } else {
-            printf("      item id=%d (local=%d) count=%d\n", globalItemId, it.item, it.count);
-        }
-    }
-}
 
 int main(int argc, char **argv)
 {
