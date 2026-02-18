@@ -1,0 +1,23 @@
+# Compiled binaries
+*.o
+*.a
+spawn_anchor
+tools/*/spawn_anchor
+
+# Build directories
+build/
+dist/
+
+# IDE files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
