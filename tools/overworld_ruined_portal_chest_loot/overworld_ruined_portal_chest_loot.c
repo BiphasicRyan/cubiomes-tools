@@ -1,4 +1,3 @@
-// seed + radius_chunks -> find ruined portals near spawn -> print chest + loot
 #include "generator.h"
 #include "finders.h"
 #include "util.h"
@@ -15,6 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Calculate distance squared from spawn point
+// Used to check if ruined portal is within search radius
 static inline int64_t sqr64(int64_t a) { return a * a; }
 
 
@@ -26,23 +27,25 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    const int mc = MC_1_21; // fixed to 1.21.x ruleset for this tool
-    const uint64_t seed = parse_u64(argv[1]);
+    const int mc = MC_1_21;  // Minecraft version 1.21
+    const uint64_t seed = parse_u64(argv[1]);  // World seed
     const int radius_chunks = parse_i32_nonneg(argv[2], "radius_chunks");
 
-    // Convert chunk radius to block radius for distance filter.
+    // Convert chunk radius to block radius for distance checking
     const int64_t R = (int64_t)radius_chunks * 16;
 
+    // Initialize world generator with seed
     Generator g;
     setupGenerator(&g, mc, 0);
     applySeed(&g, DIM_OVERWORLD, seed);
 
-    // Spawn anchor (fast)
+    // Find approximate world spawn point
     Pos spawn = estimateSpawn(&g, NULL);
 
     printf("mc=%s seed=%" PRIu64 " spawn=(%d,%d) radius=%d chunks\n",
            mc2str(mc), seed, spawn.x, spawn.z, radius_chunks);
 
+    // Set up structure search for ruined portals
     const int st = Ruined_Portal;
 
     StructureConfig sc;
@@ -52,11 +55,11 @@ int main(int argc, char **argv)
         return 3;
     }
 
-    // Region-based enumeration for this structure type
+    // Find all regions that could contain ruined portals
     const int regChunks = sc.regionSize;
     const int64_t regBlocks = (int64_t)regChunks * 16;
 
-    // Conservative region bounds around spawn-centered radius
+    // Set search boundaries around spawn point
     int rx0 = (int)((spawn.x - R) / regBlocks) - 2;
     int rx1 = (int)((spawn.x + R) / regBlocks) + 2;
     int rz0 = (int)((spawn.z - R) / regBlocks) - 2;
@@ -65,6 +68,7 @@ int main(int argc, char **argv)
     int portals = 0;
     int chests = 0;
 
+    // Search through all regions that might contain portals
     for (int rz = rz0; rz <= rz1; rz++)
     for (int rx = rx0; rx <= rx1; rx++)
     {
@@ -72,33 +76,31 @@ int main(int argc, char **argv)
         if (!getStructurePos(st, mc, seed, rx, rz, &p))
             continue;
 
-        // Distance filter in blocks
+        // Check if portal is too far from spawn
         int64_t dx = (int64_t)p.x - spawn.x;
         int64_t dz = (int64_t)p.z - spawn.z;
         if (sqr64(dx) + sqr64(dz) > sqr64(R))
             continue;
 
-        // Biome viability check. For ruined portals, flags=0.
         if (!isViableStructurePos(st, &g, p.x, p.z, 0))
             continue;
 
         portals++;
 
-        // Biome at portal pos (scale=4 uses biome coords)
         int biomeId = getBiomeAt(&g, 4, p.x >> 2, 0, p.z >> 2);
 
-        // Compute variant (rotation/mirror/type) for this structure instance
+        // Calculate how this portal looks (rotation, materials)
         StructureVariant sv = (StructureVariant){0};
         getVariant(&sv, st, mc, seed, p.x, p.z, biomeId);
 
-        // Needed for pieces/loot support
+        // Get loot generation settings for this portal
         StructureSaltConfig ssconf;
         if (!getStructureSaltConfig(st, mc, sv.biome, &ssconf)) {
             printf("%s x=%d z=%d (no loot support)\n", struct2str(st), p.x, p.z);
             continue;
         }
 
-        // Build structure pieces and extract chest info
+        // Build the actual portal structure and search each piece for chests
         Piece pieces[64];
         int nPieces = getStructurePieces(pieces, 64, st, ssconf, &sv, mc, seed, p.x, p.z);
 

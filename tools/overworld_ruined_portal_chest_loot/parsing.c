@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Parses an unsigned 64-bit integer from a string 
+// Supports decimal and hexadecimal
+// Returns the parsed value or exits with error if invalid
 uint64_t parse_u64(const char *s)
 {
     errno = 0;
@@ -16,6 +19,9 @@ uint64_t parse_u64(const char *s)
     return (uint64_t)v;
 }
 
+// Parses a non-negative 32-bit integer from a string 
+// Decimal only
+// Returns the parsed value or exits with error if invalid or out of range
 int parse_i32_nonneg(const char *s, const char *what)
 {
     errno = 0;

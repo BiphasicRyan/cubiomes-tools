@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
+// Generates and prints loot table contents for a given Minecraft version and seed
+// Displays item names and quantities, or fallback info if items are unknown
 void print_loot(const char *lootTable, int mc, uint64_t lootSeed)
 {
     LootTableContext *ctx = NULL;
