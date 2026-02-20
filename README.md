@@ -54,6 +54,47 @@ ruined_portal x=-560 z=-272 pieces=1
 Found 1 ruined portals and 1 chest(s)
 ```
 
+### ega_seed_finder
+Searches for Minecraft seeds containing ruined portal chests with multiple enchanted golden apples (EGA). This tool scans consecutive seeds and logs any seed where at least one chest within 320 chunks of spawn contains 2 or more enchanted golden apples.
+
+**Usage:**
+```bash
+./tools/overworld_ruined_portal_chest_loot/ega_seed_finder [start_seed]
+```
+
+**Parameters:**
+- `[start_seed]`: Optional starting seed (defaults to 0 if not provided)
+
+**Example:**
+```bash
+# Start searching from seed 0
+./tools/overworld_ruined_portal_chest_loot/ega_seed_finder
+
+# Resume searching from seed 1000000
+./tools/overworld_ruined_portal_chest_loot/ega_seed_finder 1000000
+```
+
+**Sample Output:**
+```
+Starting search from seed 0
+Searching 320 chunk radius from spawn for ruined portals
+Logging seeds with chests containing ≥2 enchanted golden apples to ega_jackpot_seeds.txt
+Press Ctrl+C to stop
+
+Checked 1000 seeds, found 0 jackpots (current: 1000)
+Found jackpot at seed 4006 (checked 4007)
+Checked 2000 seeds, found 1 jackpots (current: 2000)
+```
+
+**Output File Format:** (ega_jackpot_seeds.txt)
+```
+seed=4006 ega_chests=1 (-2224,48)x2
+seed=4069 ega_chests=1 (1024,-1920)x2
+```
+Each line shows: seed, number of qualifying chests, and (x,z)xcount for each chest location.
+
+**Note:** Finding 2+ enchanted golden apples in a single chest is extremely rare (roughly 1 in 80,000 per chest). Expect to check millions of seeds to find results.
+
 ## Development
 
 ### Building Individual Components
@@ -138,8 +179,12 @@ cubiomes-tools/
 └── tools/                   # Tool implementations
     └── overworld_ruined_portal_chest_loot/
         ├── overworld_ruined_portal_chest_loot.c   # Source code
+        ├── ega_seed_finder.c                      # EGA seed finder source
+        ├── loot_printer.c                         # Loot display utilities
+        ├── parsing.c                              # Argument parsing utilities
         ├── Makefile        # Tool-specific build file
-        └── overworld_ruined_portal_chest_loot     # Compiled binary
+        ├── overworld_ruined_portal_chest_loot     # Compiled binary
+        └── ega_seed_finder                          # EGA finder compiled binary
 ```
 
 ### Submodule Issues
