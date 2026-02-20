@@ -109,8 +109,8 @@ int check_seed(uint64_t seed, int mc, int radius_chunks, FILE *outfile)
                 int ega_count = count_enchanted_golden_apples(ctx);
                 total_ega += ega_count;
                 
-                // Track this chest if it has EGA
-                if (ega_count > 0 && ega_chest_count < 64) {
+                // Track this chest if it has at least 2 EGA
+                if (ega_count >= 2 && ega_chest_count < 64) {
                     ega_chests[ega_chest_count].x = chest.x;
                     ega_chests[ega_chest_count].z = chest.z;
                     ega_chests[ega_chest_count].count = ega_count;
@@ -120,15 +120,16 @@ int check_seed(uint64_t seed, int mc, int radius_chunks, FILE *outfile)
         }
     }
 
-    if (total_ega >= 2) {
-        fprintf(outfile, "seed=%" PRIu64 " total_ega=%d total_chests=%d ega_chests=%d",
-                seed, total_ega, total_chests, ega_chest_count);
+    // Only log if there's at least one chest with 2+ EGA
+    if (ega_chest_count > 0) {
+        fprintf(outfile, "seed=%" PRIu64 " ega_chests=%d",
+                seed, ega_chest_count);
         for (int i = 0; i < ega_chest_count; i++) {
             fprintf(outfile, " (%d,%d)x%d", ega_chests[i].x, ega_chests[i].z, ega_chests[i].count);
         }
         fprintf(outfile, "\n");
         fflush(outfile);
-        return total_ega;
+        return ega_chest_count;
     }
 
     return 0;
@@ -158,7 +159,7 @@ int main(int argc, char **argv)
 
     fprintf(stderr, "Starting search from seed %" PRIu64 "\n", start_seed);
     fprintf(stderr, "Searching %d chunk radius from spawn for ruined portals\n", radius_chunks);
-    fprintf(stderr, "Logging seeds with ≥2 enchanted golden apples to %s\n", outfile_name);
+    fprintf(stderr, "Logging seeds with chests containing ≥2 enchanted golden apples to %s\n", outfile_name);
     fprintf(stderr, "Press Ctrl+C to stop\n\n");
 
     uint64_t seed = start_seed;
