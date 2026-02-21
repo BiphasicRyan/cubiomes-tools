@@ -22,78 +22,74 @@ A collection of tools built on top of the [cubiomes](https://github.com/xpple/cu
 ## Tools
 
 ### overworld_ruined_portal_chest_loot
-Finds ruined portals near spawn and analyzes their chest contents.
+
+Searches for Minecraft seeds with ruined portal chests containing enchanted golden apples (EGAs). Reports seeds where individual chests meet the EGA threshold.
 
 **Usage:**
 ```bash
-./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot <seed> <radius_chunks>
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot <min_egas> <max_distance> [options]
 ```
 
-**Parameters:**
-- `<seed>`: Minecraft world seed (decimal or hexadecimal with 0x prefix)
-- `<radius_chunks>`: Search radius in chunks from spawn point
+**Required Arguments:**
+- `<min_egas>` — Minimum enchanted golden apples in a single chest (chest must have ≥ this many EGAs to be reported)
+- `<max_distance>` — Maximum block distance from (0,0) to search for portals
 
-**Example:**
+**Optional Arguments:**
+- `-s START` — Start seed (default: 0)
+- `-e END` — End seed inclusive (default: 2^48 - 1)
+- `-t THREADS` — Number of threads (default: 1)
+- `-v VERSION` — Minecraft version string, e.g., `1.21`, `1.20`, `1.16` (default: 1.21.11)
+- `--fast` — Skip biome viability check (faster, may include portals that wouldn't actually generate)
+
+**Examples:**
 ```bash
-./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 123456789 256
+# Find seeds where a single chest within 500 blocks has 3+ EGAs
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 3 500
+
+# Search seeds 0-100000 with 4 threads, fast mode
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 2 1000 -s 0 -e 100000 -t 4 --fast
+
+# Check a specific seed for any EGA chests within 4000 blocks
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 1 4000 -s 36568 -e 36568 -t 1
 ```
 
 **Sample Output:**
 ```
-mc=1.21.11 seed=123456789 spawn=(72,-40) radius=256 chunks
-ruined_portal x=-560 z=-272 pieces=1
-  chest[0] x=-560 z=-272 table=ruined_portal lootSeed=17115617723463524495
-      flint x3
-      golden_shovel x1
+========================================
+SEED 510544 (unsigned 510544)  |  Qualifying chests: 2
+----------------------------------------
+  Portal at (-432, 16)  Chest at (-432, 16)  EGAs: 1
+    Chest loot:
       obsidian x1
-      golden_helmet x1
-      golden_pickaxe x1
-      golden_axe x1
+      bell x1
+      enchanted_golden_apple x1  <<<  EGA
       golden_apple x1
-      gold_nugget x5
-Found 1 ruined portals and 1 chest(s)
+      golden_pickaxe x1
+      lodestone x1
+  Portal at (160, 240)  Chest at (160, 240)  EGAs: 2
+    Chest loot:
+      golden_leggings x1
+      enchanted_golden_apple x1  <<<  EGA
+      golden_axe x1
+      fire_charge x1
+      enchanted_golden_apple x1  <<<  EGA
+      obsidian x1
+      golden_sword x1
+      gold_ingot x5
+========================================
 ```
 
-### ega_seed_finder
-Searches for Minecraft seeds containing ruined portal chests with multiple enchanted golden apples (EGA). This tool scans consecutive seeds and logs any seed where at least one chest within 320 chunks of spawn contains 2 or more enchanted golden apples.
-
-**Usage:**
-```bash
-./tools/overworld_ruined_portal_chest_loot/ega_seed_finder [start_seed]
+**Results File:**
+Found seeds are appended to `results.txt` in the format:
+```
+SEED PORTAL_X PORTAL_Z EGA_COUNT
 ```
 
-**Parameters:**
-- `[start_seed]`: Optional starting seed (defaults to 0 if not provided)
-
-**Example:**
-```bash
-# Start searching from seed 0
-./tools/overworld_ruined_portal_chest_loot/ega_seed_finder
-
-# Resume searching from seed 1000000
-./tools/overworld_ruined_portal_chest_loot/ega_seed_finder 1000000
-```
-
-**Sample Output:**
-```
-Starting search from seed 0
-Searching 320 chunk radius from spawn for ruined portals
-Logging seeds with chests containing ≥2 enchanted golden apples to ega_jackpot_seeds.txt
-Press Ctrl+C to stop
-
-Checked 1000 seeds, found 0 jackpots (current: 1000)
-Found jackpot at seed 4006 (checked 4007)
-Checked 2000 seeds, found 1 jackpots (current: 2000)
-```
-
-**Output File Format:** (ega_jackpot_seeds.txt)
-```
-seed=4006 ega_chests=1 (-2224,48)x2
-seed=4069 ega_chests=1 (1024,-1920)x2
-```
-Each line shows: seed, number of qualifying chests, and (x,z)xcount for each chest location.
-
-**Note:** Finding 2+ enchanted golden apples in a single chest is extremely rare (roughly 1 in 80,000 per chest). Expect to check millions of seeds to find results.
+**Notes:**
+- The tool uses a per-chest threshold: a chest is only reported if it individually contains ≥ `min_egas` EGAs
+- Multi-threaded searches are thread-safe (loot generation is properly synchronized)
+- Default Minecraft version is 1.21.11 (latest)
+- Searching large seed ranges with large distances can be slow due to many portal candidates per seed
 
 ## Development
 
