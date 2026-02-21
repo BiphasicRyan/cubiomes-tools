@@ -222,7 +222,7 @@ static void *worker(void *arg)
 
     uint64_t count = 0;
     uint64_t range = ta->seed_end - ta->seed_start + 1;
-    uint64_t next_report = range / 20;  // ~5% progress steps
+    uint64_t next_report = range / 1000;  // ~1% progress steps
     if (next_report == 0) next_report = 1;
 
     for (uint64_t seed = ta->seed_start; seed <= ta->seed_end; seed++) {
