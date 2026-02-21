@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
-void print_loot(const char *lootTable, int mc, uint64_t lootSeed);
+// Count enchanted golden apples in a ruined portal chest for a given loot seed.
+int count_egas_in_chest(int mc, uint64_t loot_seed);
 
-#endif
+// Print the full loot contents of a chest, marking EGAs with "<<<".
+void print_chest_loot(int mc, uint64_t loot_seed);
+
+#endif // LOOT_PRINTER_H
