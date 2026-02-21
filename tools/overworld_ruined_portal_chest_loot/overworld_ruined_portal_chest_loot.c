@@ -134,7 +134,10 @@ static int check_seed(const SearchParams *p, Generator *g, uint64_t seed)
             }
 
             // Get biome for variant computation
-            int biomeId = getBiomeAt(g, 4, pos.x >> 2, 0, pos.z >> 2);
+            // Use y=16 in biome coords (block y=64, ~surface level) to avoid
+            // underground biomes (e.g. dripstone_caves) that would give wrong
+            // salt config and therefore wrong loot seeds.
+            int biomeId = getBiomeAt(g, 4, pos.x >> 2, 16, pos.z >> 2);
 
             StructureVariant sv = {0};
             getVariant(&sv, st, mc, seed, pos.x, pos.z, biomeId);
