@@ -4,16 +4,16 @@
 #include <stdint.h>
 
 typedef struct {
-    int min_egas;           // minimum enchanted golden apples required
-    int max_distance;       // maximum block distance from (0,0)
-    uint64_t start_seed;    // start of seed range
-    uint64_t end_seed;      // end of seed range (inclusive)
-    int num_threads;        // number of threads to use
-    int mc_version;         // minecraft version constant
-    int skip_biome_check;   // skip biome viability check for speed
-} SearchParams;
+    int min_egas;
+    int max_distance;
+    uint64_t start_seed;
+    uint64_t end_seed;
+    int threads;
+    int fast_mode;
+    int mc_version;
+} SearchConfig;
 
-int parse_args(int argc, char **argv, SearchParams *params);
-void print_usage(const char *prog_name);
+int parse_args(int argc, char *argv[], SearchConfig *config);
+void print_usage(const char *program_name);
 
-#endif // PARSING_H
+#endif
