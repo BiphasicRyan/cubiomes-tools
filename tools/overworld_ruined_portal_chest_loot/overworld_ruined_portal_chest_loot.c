@@ -53,11 +53,16 @@ int main(int argc, char *argv[])
                 if (dist > config.max_distance)
                     continue;
 
+                if (!config.fast_mode) {
+                    if (!isViableStructurePos(Ruined_Portal, &g, pos.x, pos.z, 0))
+                        continue;
+                }
+
                 if (!found) {
                     printf("Seed %llu:\n", (unsigned long long)seed);
                     found = 1;
                 }
-                printf("  Portal candidate at (%d, %d)  dist=%.0f\n", pos.x, pos.z, dist);
+                printf("  Portal at (%d, %d)  dist=%.0f\n", pos.x, pos.z, dist);
             }
         }
     }
