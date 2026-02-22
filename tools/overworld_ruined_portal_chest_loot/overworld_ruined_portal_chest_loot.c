@@ -4,6 +4,9 @@
 #include "parsing.h"
 #include "finders.h"
 #include "generator.h"
+#include "loot/loot_tables.h"
+#include "loot/mc_loot.h"
+#include "loot/items.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,13 +39,18 @@ int main(int argc, char *argv[])
     printf("Region scan range: -%d to +%d (%d regions per axis)\n\n",
            maxRegion, maxRegion, 2 * maxRegion + 1);
 
+    LootTableContext *lootCtx = NULL;
+    if (!init_ruined_portal(&lootCtx, mc)) {
+        fprintf(stderr, "Error: could not init ruined portal loot table\n");
+        return 1;
+    }
+
     Generator g;
     setupGenerator(&g, mc, 0);
 
     for (uint64_t seed = config.start_seed; seed <= config.end_seed; seed++) {
         applySeed(&g, 0, seed);
 
-        int found = 0;
         for (int regX = -maxRegion; regX <= maxRegion; regX++) {
             for (int regZ = -maxRegion; regZ <= maxRegion; regZ++) {
                 Pos pos;
@@ -58,11 +66,42 @@ int main(int argc, char *argv[])
                         continue;
                 }
 
-                if (!found) {
-                    printf("Seed %llu:\n", (unsigned long long)seed);
-                    found = 1;
+                int biomeID = getBiomeAt(&g, 4, pos.x >> 2, 160 >> 2, pos.z >> 2);
+
+                StructureVariant sv;
+                if (!getVariant(&sv, Ruined_Portal, mc, seed, pos.x, pos.z, biomeID))
+                    continue;
+
+                StructureSaltConfig ssconf;
+                if (!getStructureSaltConfig(Ruined_Portal, mc, sv.biome, &ssconf))
+                    continue;
+
+                Piece piece;
+                if (getStructurePieces(&piece, 1, Ruined_Portal, ssconf, &sv, mc, seed, pos.x, pos.z) < 1)
+                    continue;
+
+                set_loot_seed(lootCtx, piece.lootSeeds[0]);
+                generate_loot(lootCtx);
+
+                int ega_count = 0;
+                for (int i = 0; i < lootCtx->generated_item_count; i++) {
+                    int gid = get_global_item_id(lootCtx, lootCtx->generated_items[i].item);
+                    if (gid == ITEM_ENCHANTED_GOLDEN_APPLE)
+                        ega_count += lootCtx->generated_items[i].count;
                 }
-                printf("  Portal at (%d, %d)  dist=%.0f\n", pos.x, pos.z, dist);
+
+                if (ega_count >= config.min_egas) {
+                    printf("SEED %-12llu  Portal at (%d, %d)  dist=%.0f  EGAs: %d\n",
+                           (unsigned long long)seed, pos.x, pos.z, dist, ega_count);
+                    printf("  Chest loot:\n");
+                    for (int i = 0; i < lootCtx->generated_item_count; i++) {
+                        const char *name = get_item_name(lootCtx, lootCtx->generated_items[i].item);
+                        int count = lootCtx->generated_items[i].count;
+                        int gid = get_global_item_id(lootCtx, lootCtx->generated_items[i].item);
+                        printf("    %s x%d%s\n", name, count,
+                               gid == ITEM_ENCHANTED_GOLDEN_APPLE ? "  <<< EGA" : "");
+                    }
+                }
             }
         }
     }
