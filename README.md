@@ -16,7 +16,7 @@ A collection of tools built on top of the [cubiomes](https://github.com/xpple/cu
 
 3. **Run the tools:**
    ```bash
-   ./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 123456789 256
+   ./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 1 500 -s 0 -e 100000
    ```
 
 ## Tools
@@ -38,110 +38,63 @@ Searches for Minecraft seeds with ruined portal chests containing enchanted gold
 - `-s START` — Start seed (default: 0)
 - `-e END` — End seed inclusive (default: 2^48 - 1)
 - `-t THREADS` — Number of threads (default: 1)
-- `-v VERSION` — Minecraft version string, e.g., `1.21`, `1.20`, `1.16` (default: 1.21.11)
 - `--fast` — Skip biome viability check (faster, may include portals that wouldn't actually generate)
 
 **Examples:**
 ```bash
-# Find seeds where a single chest within 500 blocks has 3+ EGAs
-./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 3 500
+# Find seeds where a single chest within 500 blocks has 1+ EGAs
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 1 500 -s 0 -e 1000
 
 # Search seeds 0-100000 with 4 threads, fast mode
 ./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 2 1000 -s 0 -e 100000 -t 4 --fast
 
-# Check a specific seed for any EGA chests within 4000 blocks
-./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 1 4000 -s 36568 -e 36568 -t 1
+# Check a specific seed for any EGA chests within 1000 blocks
+./tools/overworld_ruined_portal_chest_loot/overworld_ruined_portal_chest_loot 1 1000 -s 271933139 -e 271933139
 ```
 
 **Sample Output:**
 ```
-========================================
-SEED 510544 (unsigned 510544)  |  Qualifying chests: 2
-----------------------------------------
-  Portal at (-432, 16)  Chest at (-432, 16)  EGAs: 1
-    Chest loot:
-      obsidian x1
-      bell x1
-      enchanted_golden_apple x1  <<<  EGA
-      golden_apple x1
-      golden_pickaxe x1
-      lodestone x1
-  Portal at (160, 240)  Chest at (160, 240)  EGAs: 2
-    Chest loot:
-      golden_leggings x1
-      enchanted_golden_apple x1  <<<  EGA
-      golden_axe x1
-      fire_charge x1
-      enchanted_golden_apple x1  <<<  EGA
-      obsidian x1
-      golden_sword x1
-      gold_ingot x5
-========================================
+SEED 271933139     Portal at (-352, 304)  dist=465  EGAs: 4
+    minecraft:enchanted_golden_apple x1  <<< EGA
+    minecraft:enchanted_golden_apple x1  <<< EGA
+    minecraft:flint x2
+    minecraft:flint_and_steel x1
+    minecraft:enchanted_golden_apple x1  <<< EGA
+    minecraft:enchanted_golden_apple x1  <<< EGA
+    minecraft:golden_apple x1
+    minecraft:fire_charge x1
+
+Done. Checked 1 seeds, found 1 hits. Results appended to results.txt
 ```
 
 **Results File:**
 Found seeds are appended to `results.txt` in the format:
 ```
-SEED PORTAL_X PORTAL_Z EGA_COUNT
+<seed> <portal_x> <portal_z> <ega_count>
 ```
 
 **Notes:**
 - The tool uses a per-chest threshold: a chest is only reported if it individually contains ≥ `min_egas` EGAs
-- Multi-threaded searches are thread-safe (loot generation is properly synchronized)
-- Default Minecraft version is 1.21.11 (latest)
+- Multi-threaded searches are thread-safe; each thread gets its own `Generator` and `LootTableContext` copy
+- Hardcoded to Minecraft 1.21 (MC_1_21)
 - Searching large seed ranges with large distances can be slow due to many portal candidates per seed
 
 ## Development
 
-### Building Individual Components
+### Building
 
 ```bash
+# Build everything (cubiomes library + tools)
+make
+
 # Build only the cubiomes library
 make cubiomes
 
-# Build only the tools (requires cubiomes library to be built first)
+# Build only the tools (requires cubiomes library)
 make tools
 
 # Clean all built files
 make clean
-```
-
-### Updating Dependencies
-
-#### Update cubiomes submodule
-To update to the latest version of the cubiomes dependency:
-
-```bash
-# Navigate to the cubiomes submodule directory
-cd cubiomes
-
-# Pull the latest changes
-git pull origin main
-
-# Navigate back to the root directory
-cd ..
-
-# Commit the submodule update
-git add cubiomes
-git commit -m "Update cubiomes submodule to latest version"
-git push
-```
-
-#### Update submodule to specific commit/branch
-```bash
-# Navigate to the cubiomes submodule directory
-cd cubiomes
-
-# Checkout a specific branch or commit
-git checkout <branch-name-or-commit-hash>
-
-# Navigate back to the root directory
-cd ..
-
-# Commit the submodule update
-git add cubiomes
-git commit -m "Update cubiomes submodule to <branch-name-or-commit-hash>"
-git push
 ```
 
 ### Adding New Tools
@@ -151,41 +104,48 @@ git push
    mkdir tools/my_tool
    ```
 
-2. Add your source files and a Makefile (see `tools/overworld_ruined_portal_chest_loot/Makefile` for reference)
+2. Add your source files (`.c` and `.h`)
 
-3. Update the root `Makefile` to include your new tool in the `TOOLS` variable
+3. Add a build target to the root `Makefile` and append it to the `TOOLS` variable
 
 4. Build and test:
    ```bash
    make tools
    ```
 
+### Updating the cubiomes Submodule
+
+```bash
+cd cubiomes
+git pull origin main
+cd ..
+git add cubiomes
+git commit -m "Update cubiomes submodule"
+```
+
 ## Repository Structure
 
 ```
 cubiomes-tools/
-├── README.md                 # This file
-├── Makefile                  # Root build file
-├── .gitignore               # Git ignore patterns
-├── .gitmodules              # Git submodule configuration
-├── cubiomes/                # cubiomes library (git submodule)
-│   ├── libcubiomes.a       # Compiled library
-│   ├── *.h                 # Header files
-│   └── ...                 # Other cubiomes files
-└── tools/                   # Tool implementations
+├── README.md
+├── Makefile
+├── .gitignore
+├── .gitmodules
+├── cubiomes/                  # cubiomes library (git submodule)
+│   ├── libcubiomes.a          # Compiled library
+│   ├── *.h                    # Header files (finders.h, generator.h, etc.)
+│   ├── loot/                  # Loot generation headers and tables
+│   └── ...
+└── tools/
     └── overworld_ruined_portal_chest_loot/
-        ├── overworld_ruined_portal_chest_loot.c   # Source code
-        ├── ega_seed_finder.c                      # EGA seed finder source
-        ├── loot_printer.c                         # Loot display utilities
-        ├── parsing.c                              # Argument parsing utilities
-        ├── Makefile        # Tool-specific build file
-        ├── overworld_ruined_portal_chest_loot     # Compiled binary
-        └── ega_seed_finder                          # EGA finder compiled binary
+        ├── overworld_ruined_portal_chest_loot.c   # Main tool (search + threading)
+        ├── parsing.c                              # CLI argument parsing
+        └── parsing.h                              # SearchConfig struct + prototypes
 ```
 
 ### Submodule Issues
 
-**Submodule directory is empty**
+**Submodule directory is empty:**
 ```bash
 git submodule update --init --recursive
 ```
